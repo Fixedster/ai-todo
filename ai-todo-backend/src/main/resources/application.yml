@@ -1,0 +1,63 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: ai-todo-backend
+  datasource:
+    url: jdbc:mysql://localhost:3306/ai_todo?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: root
+    password: ${DB_PASSWORD:123456}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    continue-on-error: true
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/schema.sql
+      data-locations: classpath:db/data.sql
+      continue-on-error: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+      timeout: 5s
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+mybatis-plus:
+  type-aliases-package: com.aitodo.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: isDeleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+jwt:
+  secret: ${JWT_SECRET:ai-todo-secret-key-2024-very-long-and-secure-key-for-jwt-signing}
+  access-token-expiration: 7200000
+  refresh-token-expiration: 604800000
+
+deepseek:
+  api-key: ${DEEPSEEK_API_KEY:sk-your-key-here}
+  api-url: https://api.deepseek.com/chat/completions
+  model: deepseek-chat
+
+cors:
+  allowed-origins: "*"
+
+logging:
+  level:
+    com.aitodo: debug
+    org.springframework.jdbc: debug
