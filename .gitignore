@@ -10,3 +10,12 @@ target/
 .claude/
 .DS_Store
 Thumbs.db
+
+image/
+
+# 个人文档
+曹佳乐 15136787679.md
+曹佳乐_15136787679_AI工程研发.pdf
+面试准备_*.md
+面试攻略.md
+项目一_AI_Todo_需求文档.md
