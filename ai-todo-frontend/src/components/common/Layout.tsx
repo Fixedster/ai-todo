@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import {
   Layout as AntLayout,
@@ -38,9 +38,21 @@ const menuItems = [
 
 export default function Layout({ onThemeChange }: LayoutProps) {
   const [collapsed, setCollapsed] = useState(false)
+  const [isDark, setIsDark] = useState(() => localStorage.getItem('theme') === 'dark')
+  const [accentColor, setAccentColor] = useState(() => localStorage.getItem('accentColor') || '#5b8a72')
   const navigate = useNavigate()
   const location = useLocation()
   const { user, logout } = useAuthStore()
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail
+      if (detail?.theme) setIsDark(detail.theme === 'dark')
+      if (detail?.accentColor) setAccentColor(detail.accentColor)
+    }
+    window.addEventListener('themeChange', handler)
+    return () => window.removeEventListener('themeChange', handler)
+  }, [])
 
   const handleMenuClick = ({ key }: { key: string }) => {
     navigate(key)
@@ -67,18 +79,29 @@ export default function Layout({ onThemeChange }: LayoutProps) {
     },
   ]
 
+  const siderBg = isDark ? '#1a1a1a' : '#fdfcfa'
+  const headerBg = isDark ? 'rgba(26,26,26,0.85)' : 'rgba(253, 252, 250, 0.85)'
+  const contentBg = isDark ? 'rgba(31,31,31,0.6)' : 'rgba(255, 255, 255, 0.6)'
+  const borderColor = isDark ? '#2a2a2a' : '#f0ebe3'
+  const textMuted = isDark ? '#888888' : '#a09a93'
+  const textSecondary = isDark ? '#a0a0a0' : '#7a756f'
+  const textPrimary = isDark ? '#e0e0e0' : '#2d2a26'
+  const hoverBg = isDark ? 'rgba(255,255,255,0.08)' : '#e4efe9'
+  const hoverBorder = isDark ? 'rgba(255,255,255,0.15)' : '#a8c9b6'
+  const cardGradient = isDark ? 'linear-gradient(135deg, #2a2a2a, #1f1f1f)' : 'linear-gradient(135deg, #e4efe9, #f0ebe3)'
+
   return (
-    <AntLayout style={{ minHeight: '100vh', background: '#f8f5f0' }}>
+    <AntLayout style={{ minHeight: '100vh', background: isDark ? '#141414' : '#f8f5f0' }}>
       <Sider
         trigger={null}
         collapsible
         collapsed={collapsed}
-        theme="light"
+        theme={isDark ? 'dark' : 'light'}
         style={{
-          boxShadow: '2px 0 16px rgba(45, 42, 38, 0.04)',
+          boxShadow: isDark ? '2px 0 16px rgba(0,0,0,0.3)' : '2px 0 16px rgba(45, 42, 38, 0.04)',
           zIndex: 10,
-          borderRight: '1px solid #f0ebe3',
-          background: '#fdfcfa',
+          borderRight: `1px solid ${borderColor}`,
+          background: siderBg,
         }}
       >
         <div
@@ -90,10 +113,10 @@ export default function Layout({ onThemeChange }: LayoutProps) {
             gap: 8,
             fontSize: collapsed ? 16 : 20,
             fontWeight: 700,
-            color: '#5b8a72',
+            color: accentColor,
             letterSpacing: '-0.5px',
             fontFamily: "'Noto Serif SC', serif",
-            borderBottom: '1px solid #f0ebe3',
+            borderBottom: `1px solid ${borderColor}`,
           }}
         >
           <LeafOutlined style={{ fontSize: collapsed ? 18 : 22 }} />
@@ -104,6 +127,7 @@ export default function Layout({ onThemeChange }: LayoutProps) {
           selectedKeys={[location.pathname]}
           items={menuItems}
           onClick={handleMenuClick}
+          theme={isDark ? 'dark' : 'light'}
           style={{
             borderRight: 0,
             marginTop: 8,
@@ -119,28 +143,28 @@ export default function Layout({ onThemeChange }: LayoutProps) {
               left: 16,
               right: 16,
               padding: '16px',
-              background: 'linear-gradient(135deg, #e4efe9, #f0ebe3)',
+              background: cardGradient,
               borderRadius: 12,
               textAlign: 'center',
             }}
           >
-            <LeafOutlined style={{ fontSize: 24, color: '#5b8a72', marginBottom: 6, display: 'block' }} />
-            <div style={{ fontSize: 12, color: '#7a756f', lineHeight: 1.5 }}>
+            <LeafOutlined style={{ fontSize: 24, color: accentColor, marginBottom: 6, display: 'block' }} />
+            <div style={{ fontSize: 12, color: textSecondary, lineHeight: 1.5 }}>
               自然专注<br />高效生活
             </div>
           </div>
         )}
       </Sider>
-      <AntLayout style={{ background: '#f8f5f0' }}>
+      <AntLayout style={{ background: isDark ? '#141414' : '#f8f5f0' }}>
         <Header
           style={{
             padding: '0 28px',
-            background: 'rgba(253, 252, 250, 0.85)',
+            background: headerBg,
             backdropFilter: 'blur(16px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            borderBottom: '1px solid #f0ebe3',
+            borderBottom: `1px solid ${borderColor}`,
             zIndex: 9,
             height: 56,
           }}
@@ -149,13 +173,13 @@ export default function Layout({ onThemeChange }: LayoutProps) {
             type="text"
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             onClick={() => setCollapsed(!collapsed)}
-            style={{ fontSize: 16, color: '#7a756f' }}
+            style={{ fontSize: 16, color: textSecondary }}
           />
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <div
               style={{
                 fontSize: 13,
-                color: '#a09a93',
+                color: textMuted,
                 fontFamily: "'Noto Serif SC', serif",
               }}
             >
@@ -174,8 +198,8 @@ export default function Layout({ onThemeChange }: LayoutProps) {
                   border: '1px solid transparent',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#e4efe9'
-                  e.currentTarget.style.borderColor = '#a8c9b6'
+                  e.currentTarget.style.background = hoverBg
+                  e.currentTarget.style.borderColor = hoverBorder
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'transparent'
@@ -185,9 +209,9 @@ export default function Layout({ onThemeChange }: LayoutProps) {
                 <Avatar
                   icon={<UserOutlined />}
                   src={user?.avatar}
-                  style={{ backgroundColor: '#5b8a72', width: 32, height: 32 }}
+                  style={{ backgroundColor: accentColor, width: 32, height: 32 }}
                 />
-                <span style={{ fontSize: 14, fontWeight: 500, color: '#2d2a26' }}>
+                <span style={{ fontSize: 14, fontWeight: 500, color: textPrimary }}>
                   {user?.username || '用户'}
                 </span>
               </div>
@@ -198,12 +222,12 @@ export default function Layout({ onThemeChange }: LayoutProps) {
           style={{
             margin: 20,
             padding: 28,
-            background: 'rgba(255, 255, 255, 0.6)',
+            background: contentBg,
             borderRadius: 16,
             minHeight: 280,
             overflow: 'auto',
-            boxShadow: '0 1px 4px rgba(45, 42, 38, 0.03)',
-            border: '1px solid #f0ebe3',
+            boxShadow: isDark ? '0 1px 4px rgba(0,0,0,0.2)' : '0 1px 4px rgba(45, 42, 38, 0.03)',
+            border: `1px solid ${borderColor}`,
             backdropFilter: 'blur(8px)',
           }}
         >

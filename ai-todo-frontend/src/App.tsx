@@ -22,29 +22,54 @@ interface AppProps {
 
 function App({ themeMode }: AppProps) {
   const [currentTheme, setCurrentTheme] = useState<'dark' | 'light'>(themeMode)
+  const [accentColor, setAccentColor] = useState(() => localStorage.getItem('accentColor') || '#5b8a72')
 
   useEffect(() => {
     setCurrentTheme(themeMode)
   }, [themeMode])
 
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail
+      if (detail?.theme) {
+        setCurrentTheme(detail.theme)
+        document.documentElement.setAttribute('data-theme', detail.theme)
+      }
+      if (detail?.accentColor) {
+        setAccentColor(detail.accentColor)
+        document.documentElement.style.setProperty('--nature-primary', detail.accentColor)
+      }
+    }
+    window.addEventListener('themeChange', handler)
+    return () => window.removeEventListener('themeChange', handler)
+  }, [])
+
+  // apply initial CSS vars
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', currentTheme)
+    document.documentElement.style.setProperty('--nature-primary', accentColor)
+  }, [])
+
   const handleThemeChange = (newTheme: 'dark' | 'light') => {
     setCurrentTheme(newTheme)
   }
 
+  const isDark = currentTheme === 'dark'
+
   return (
     <ConfigProvider
       theme={{
-        algorithm: currentTheme === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
+        algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
         token: {
-          colorPrimary: '#5b8a72',
+          colorPrimary: accentColor,
           borderRadius: 10,
-          colorBgContainer: '#ffffff',
-          colorBgLayout: '#f8f5f0',
-          colorBorder: '#e8e2d9',
-          colorBorderSecondary: '#f0ebe3',
-          colorText: '#2d2a26',
-          colorTextSecondary: '#7a756f',
-          colorTextTertiary: '#a09a93',
+          colorBgContainer: isDark ? '#1f1f1f' : '#ffffff',
+          colorBgLayout: isDark ? '#141414' : '#f8f5f0',
+          colorBorder: isDark ? '#333333' : '#e8e2d9',
+          colorBorderSecondary: isDark ? '#2a2a2a' : '#f0ebe3',
+          colorText: isDark ? '#e0e0e0' : '#2d2a26',
+          colorTextSecondary: isDark ? '#a0a0a0' : '#7a756f',
+          colorTextTertiary: isDark ? '#888888' : '#a09a93',
           fontFamily: "'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
           fontSize: 14,
           colorSuccess: '#6aab73',
@@ -54,21 +79,21 @@ function App({ themeMode }: AppProps) {
         },
         components: {
           Menu: {
-            itemSelectedColor: '#3d6b54',
-            itemSelectedBg: '#e4efe9',
-            itemHoverColor: '#5b8a72',
-            itemHoverBg: '#f0ebe3',
+            itemSelectedColor: accentColor,
+            itemSelectedBg: isDark ? 'rgba(255,255,255,0.08)' : '#e4efe9',
+            itemHoverColor: accentColor,
+            itemHoverBg: isDark ? 'rgba(255,255,255,0.05)' : '#f0ebe3',
           },
           Card: {
             borderRadius: 14,
           },
           Button: {
             borderRadius: 10,
-            primaryShadow: '0 4px 12px rgba(91, 138, 114, 0.3)',
+            primaryShadow: `0 4px 12px ${accentColor}4d`,
           },
           Input: {
             borderRadius: 10,
-            colorBorder: '#e8e2d9',
+            colorBorder: isDark ? '#333333' : '#e8e2d9',
           },
           Select: {
             borderRadius: 10,

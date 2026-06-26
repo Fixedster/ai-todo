@@ -55,6 +55,19 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--nature-bg) !important;
 }
 
+html[data-theme="dark"] {
+  --nature-bg: #141414;
+  --nature-bg-warm: #1a1a1a;
+  --nature-surface: #1f1f1f;
+  --nature-text: #e0e0e0;
+  --nature-text-secondary: #a0a0a0;
+  --nature-text-muted: #888888;
+  --nature-border: #333333;
+  --nature-border-light: #2a2a2a;
+  --nature-shadow: rgba(0, 0, 0, 0.2);
+  --nature-shadow-md: rgba(0, 0, 0, 0.35);
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
